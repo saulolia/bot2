@@ -1,16 +1,14 @@
 {
   "name": "bot-minecraft",
   "version": "1.0.0",
+  "description": "Minecraft bot using mineflayer and pathfinder",
   "main": "index.js",
-  "dependencies": {
-    "mineflayer": "^4.0.0",  // ou a versão mais recente estável do mineflayer
-    "mineflayer-pathfinder": "^2.2.0",  // Certifique-se de usar a versão correta do pathfinder
-    "random-js": "^1.0.0"
-  }
-}
-
-  },
   "scripts": {
     "start": "node index.js"
+  },
+  "dependencies": {
+    "mineflayer": "^4.0.0",
+    "mineflayer-pathfinder": "^2.2.0",
+    "random-js": "^1.0.0"
   }
 }
