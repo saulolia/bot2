@@ -1,13 +1,13 @@
 {
   "name": "bot-minecraft",
   "version": "1.0.0",
-  "description": "Bot Minecraft + Página Web Status",
   "main": "index.js",
+  "dependencies": {
+    "mineflayer": "^4.0.0",   // Verifique a versão correta
+    "mineflayer-pathfinder": "^1.0.0",  // Adicione essa linha
+    "express": "^4.17.1"
+  },
   "scripts": {
     "start": "node index.js"
-  },
-  "dependencies": {
-    "express": "^4.18.2",
-    "mineflayer": "^4.15.0"
   }
 }
