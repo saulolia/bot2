@@ -18,9 +18,9 @@ function getUptime() {
 }
 
 const bot = mineflayer.createBot({
-  host: 'ip-do-servidor',
-  port: 25565,
-  username: 'bot_espectador',
+  host: 'mapatest97.aternos.me',
+  port: 18180,
+  username: 'julianobasto',
   version: '1.21.4'
 })
 
