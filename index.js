@@ -2,7 +2,8 @@ const express = require('express');
 const mineflayer = require('mineflayer');
 const { pathfinder } = require('mineflayer-pathfinder');
 const { Movements, goals } = require('mineflayer-pathfinder');
-const random = require('random');
+const Random = require('random-js');  // Importando a biblioteca random-js
+const random = new Random.Random();   // Instanciando o random-js
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -15,7 +16,7 @@ function createBot() {
   bot = mineflayer.createBot({
     host: 'mapatest97.aternos.me',
     port: 18180,
-    username: 'junina123',
+    username: 'junin123123,
     version: '1.21.4',
   });
 
