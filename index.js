@@ -16,7 +16,7 @@ function createBot() {
   bot = mineflayer.createBot({
     host: 'mapatest97.aternos.me',
     port: 18180,
-    username: 'junin123123,
+    username: 'junin123123',
     version: '1.21.4',
   });
 
