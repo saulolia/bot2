@@ -1,23 +1,18 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html>
 <head>
-  <meta charset="UTF-8">
   <title>Status do Bot Minecraft</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f0f0f0;
+      font-family: sans-serif;
       padding: 20px;
+      background: #f0f0f0;
     }
-    h1, h2 {
-      color: #333;
-    }
-    .status, .commands {
+    .box {
       background: #fff;
       padding: 20px;
-      margin: 15px 0;
-      border-radius: 10px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      border-radius: 8px;
     }
     ul {
       list-style: none;
@@ -28,17 +23,17 @@
 <body>
   <h1>🤖 Status do Bot Minecraft</h1>
 
-  <div class="status">
-    <h2>Status: <%= status.status %></h2>
-    <p>⏱️ Uptime: <%= botUptime %> segundos</p>
+  <div class="box">
+    <p>Status: <strong><%= status %></strong></p>
+    <p>⏱ Uptime: <%= botUptime %> segundos</p>
     <p>👥 Jogadores online: <%= playersOnline %></p>
   </div>
 
-  <div class="commands">
-    <h2>📜 Últimos Comandos</h2>
+  <div class="box">
+    <h2>📜 Últimos comandos</h2>
     <ul>
       <% commands.forEach(cmd => { %>
-        <li><strong><%= cmd.username %></strong>: <%= cmd.message %> (<%= new Date(cmd.timestamp).toLocaleString() %>)</li>
+        <li><strong><%= cmd.username %></strong>: <%= cmd.message %> (<%= new Date(cmd.timestamp).toLocaleTimeString() %>)</li>
       <% }) %>
     </ul>
   </div>
