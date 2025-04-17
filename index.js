@@ -1,121 +1,90 @@
-const mineflayer = require('mineflayer')
-const express = require('express')
-const app = express()
-const port = process.env.PORT || 3000
+const express = require('express');
+const mineflayer = require('mineflayer');
+const { pathfinder } = require('mineflayer-pathfinder');
+const { Movements, goals } = require('mineflayer-pathfinder');
+const random = require('random');
 
-let botStatus = 'desconectado'
-let onlinePlayers = 0
-let botStartTime = null
-let chatLog = []
+const app = express();
+const port = process.env.PORT || 3000;
 
-function getUptime() {
-  if (!botStartTime) return 'Desconectado'
-  const diff = Math.floor((Date.now() - botStartTime) / 1000)
-  const h = Math.floor(diff / 3600)
-  const m = Math.floor((diff % 3600) / 60)
-  const s = diff % 60
-  return `${h}h ${m}m ${s}s`
+let bot;
+let chatLog = []; // Guardar os últimos chats
+let botStartTime = new Date();
+
+function createBot() {
+  bot = mineflayer.createBot({
+    host: 'mapatest97.aternos.me',
+    port: 18180,
+    username: 'junina123',
+    version: '1.21.4',
+  });
+
+  bot.loadPlugin(pathfinder);
+
+  bot.on('spawn', () => {
+    console.log('🤖 Bot conectado!');
+    botStartTime = new Date();
+    
+    // Começar o movimento aleatório após o spawn
+    startRandomMovement();
+  });
+
+  bot.on('chat', (username, message) => {
+    if (username === bot.username) return;
+
+    if (message === 'andar') {
+      bot.chat('Vou andar aleatoriamente!');
+      startRandomMovement();
+    }
+
+    console.log(`${username}: ${message}`);
+    chatLog.unshift({ username, message, timestamp: new Date() });
+
+    if (chatLog.length > 10) chatLog.pop(); // Limitar para os últimos 10 comandos
+  });
+
+  bot.on('end', () => {
+    console.log('⚠️ Bot desconectado.');
+  });
+
+  bot.on('error', (err) => {
+    console.error('Erro no bot:', err);
+  });
 }
 
-const bot = mineflayer.createBot({
-  host: 'mapatest97.aternos.me',
-  port: 18180,
-  username: 'julianobasto',
-  version: '1.21.4'
-})
+function startRandomMovement() {
+  const randomX = random.int(100, 200);
+  const randomZ = random.int(100, 200);
+  const randomY = bot.entity.position.y; // Manter a altura atual
 
-bot.on('spawn', () => {
-  console.log('Bot entrou no servidor!')
-  botStatus = 'online'
-  botStartTime = Date.now()
+  const goal = new goals.GoalBlock(randomX, randomY, randomZ);
+  const movements = new Movements(bot, bot.entity.gameMode);
+  
+  bot.pathfinder.setMovements(movements);
+  bot.pathfinder.setGoal(goal);
 
-  setInterval(() => {
-    bot.setControlState('jump', true)
-    setTimeout(() => bot.setControlState('jump', false), 200)
-    bot.look(Math.random() * 360, Math.random() * 360, true)
-    onlinePlayers = Object.keys(bot.players).length
-  }, 10000)
-})
+  console.log(`🤖 Bot indo para a coordenada aleatória: (${randomX}, ${randomY}, ${randomZ})`);
+  
+  // Agendar o próximo movimento aleatório após 10-20 segundos
+  setTimeout(startRandomMovement, random.int(10000, 20000)); // Tempo aleatório entre 10 a 20 segundos
+}
 
-bot.on('chat', (username, message) => {
-  if (username !== bot.username) {
-    const timestamp = new Date().toLocaleTimeString()
-    chatLog.push(`[${timestamp}] <${username}> ${message}`)
-    if (chatLog.length > 50) chatLog.shift()
-  }
-})
+app.set('view engine', 'ejs');
+app.use(express.static('public'));
 
-bot.on('end', () => {
-  botStatus = 'desconectado'
-  onlinePlayers = 0
-  botStartTime = null
-  setTimeout(() => bot.connect(), 5000)
-})
-
-bot.on('error', err => {
-  console.log('Erro:', err)
-  botStatus = 'erro'
-})
-
-// Rotas API
-app.get('/status', (req, res) => {
-  res.json({
-    status: botStatus,
-    players: onlinePlayers,
-    uptime: getUptime(),
-    chat: chatLog
-  })
-})
-
-// Página
 app.get('/', (req, res) => {
-  res.send(`
-    <html>
-      <head>
-        <title>Status do Bot</title>
-        <style>
-          body {
-            font-family: Arial, sans-serif;
-            background-color: #111;
-            color: #eee;
-            text-align: center;
-            padding: 40px;
-          }
-          h1 { font-size: 2em; margin-bottom: 10px; }
-          #status, #players, #uptime { font-size: 1.2em; margin: 5px; }
-          #chat { margin-top: 30px; background: #222; padding: 10px; text-align: left; height: 300px; overflow-y: scroll; border-radius: 8px; }
-          .msg { margin-bottom: 5px; font-family: monospace; }
-        </style>
-      </head>
-      <body>
-        <h1>Bot Mineflayer</h1>
-        <div id="status">Status: carregando...</div>
-        <div id="players">Jogadores online: carregando...</div>
-        <div id="uptime">Tempo online: carregando...</div>
-        <div id="chat"></div>
+  const uptime = Math.floor((new Date() - botStartTime) / 1000);
+  const playersOnline = bot?.players ? Object.keys(bot.players).length : 0;
 
-        <script>
-          async function atualizarStatus() {
-            const res = await fetch('/status')
-            const data = await res.json()
-
-            document.getElementById('status').textContent = 'Status: ' + data.status
-            document.getElementById('players').textContent = 'Jogadores online: ' + data.players
-            document.getElementById('uptime').textContent = 'Tempo online: ' + data.uptime
-
-            const chatDiv = document.getElementById('chat')
-            chatDiv.innerHTML = data.chat.map(msg => '<div class="msg">' + msg + '</div>').join('')
-            chatDiv.scrollTop = chatDiv.scrollHeight
-          }
-
-          setInterval(atualizarStatus, 2000)
-          atualizarStatus()
-        </script>
-      </body>
-    </html>
-  `)
-})
+  res.render('index', {
+    status: 'online',
+    commands: chatLog,
+    playersOnline,
+    botUptime: uptime
+  });
+});
 
 app.listen(port, () => {
-  console.log(`Servidor web rodando na porta ${port}`)
-})
+  console.log(`🌐 Servidor web em http://localhost:${port}`);
+  createBot();
+});
